@@ -1,13 +1,17 @@
+source("yeast-proteome.R")
 
+# Function that returns the Systematic Name of the inputed Standard Names
 sys_name <- function(x, df = yeast_full){
     output <- df[match(x, df$Gene.designations), ]$OLN
     names(output) <- x
     return(output)
 }
 
+# Function that returns the Standard Name(s) of the inputed Systematic Name(s)
+# Since in the yeast_full df there are multiple rows with the same Systematic Name (OLN column), match() does not work
+# Note that this version does not make a distinction between the Standard Name and the Aliases (if present), since they are replicated on new rows in the dataframe 
+
 gene_name <- function(y, df = yeast_full){
-    out <- df[match(x, df$OLN), ]$Gene.designations
-    
     df_temp <- df[grep(paste(y, collapse = "|"), df$OLN, value = FALSE), c(1,2,4)] %>% arrange(Entry)
     # df_temp <- df_temp[order(df$Entry),] # another way to order the df that doesn't require dplyr
     output <- df_temp$Gene.designations
@@ -27,7 +31,6 @@ names(ko_strains) <- c("KO Strain", "N° regulated proteins", "N° peptides")
 
 ppep_url <- "http://www.sbeams.org/devDC/sbeams/cgi/Glycopeptide//kinase_details.cgi?kinase=" #backbone of the url(s) to be scraped
 xpath_expr <- "//table[@id='regulates']/tr/*" # xpath expression that positions inside the table with the data
-#urls <- character()
 
 get_ko_data <- function(k, url = ppep_url, df = ko_strains){
     # creates a vector with the systematic name of the knock-out strains to be scraped 
