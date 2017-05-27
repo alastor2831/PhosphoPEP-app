@@ -1,4 +1,5 @@
-# This script creates a local dataframe with the yeast proteome from Uniprot
+# This script creates a local dataframe with the yeast proteome from Uniprot.
+# In this version observations (rows) with multiple Gene.designations (aka Standard Names) are splitted and replicated on new rows
 
 library(stringr)
 library(dplyr)
