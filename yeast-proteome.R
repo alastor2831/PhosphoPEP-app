@@ -1,39 +1,32 @@
-# This script creates a local dataframe with the yeast proteome from Uniprot.
-# In this version observations (rows) with multiple Gene.designations (aka Standard Names) are splitted and replicated on new rows
+# New version -----------------------------------------------------------
+# In this version the occurrences (rows) with multiple Standard Names are separated into multiple columns without row duplication
+# By counting ; in the first column of the yeast df, the maximum number of multiple Standard Names (or Aliases) is 9.
 
 library(stringr)
 library(dplyr)
+library(tidyr)
 
 download.file("http://www.uniprot.org/docs/yeast.txt", "./yeast.txt")
-
-#Here I was trying to read the header from the txt file but it's prob not worth it
-#column_names <- (read.fwf("yeast.txt", widths = c(75,20,11,12,13,10), header = F, skip = 55, n=1, strip.white = T))
-
 column_names <- c("Gene designations", "OLN", "Swiss-Prot AC", "Entry", "SGD X-ref", "Size", "3D", "CH")
 column_classes <- c(rep("character",5), "numeric", rep("character",2))
-
 yeast <- read.fwf("yeast.txt", widths = c(75,20,11,12,12,5,4,2), header = F, col.names = column_names, colClasses = column_classes, skip = 58, n=6726, strip.white = T)
 
-#The dataset has observations (rows) with multiple gene names separated by a ;
-#This line extracts rows with multiple Gene designation names in a new dataframe (NB: grepl returns a logical vector T when there is a ;)
-yeast_mult<- yeast[grepl(";", yeast$Gene.designations),]
+yeast2 <- yeast %>% separate(Gene.designations, into = c("Gene.designations", paste0(rep("Alias.", 9), 1:9)), sep = ";", fill = "right") %>% select(Gene.designations, OLN:CH, Alias.1:Alias.9) %>% tbl_df
 
-#make a vector that counts how many ; there are on each row
-rep_vect <- str_count(yeast_mult$Gene.designations,";")
 
-# split multiple Gene Designations into single vector elements
-vect_names <- unlist(strsplit(yeast_mult$Gene.designations, ";"))
-# and remove blanks from the elements
-vect_names <- gsub(" ", "", vect_names)
+# The sys_name function is unchanged since 
+sys_name <- function(x, df = yeast_full){
+    output <- df[match(x, df$Gene.designations), ]$OLN
+    names(output) <- x
+    return(output)
+}
 
-#copy each rows as many times as the number of different gene names (taken from the rep_vect + 1)
-yeast_expand <- yeast_mult[rep(row.names(yeast_mult), rep_vect+1), ] # +1 because the number of names is always one more than the number of ; 
-
-#rename the Gene.designations column with the vector of single names
-yeast_expand$Gene.designations <- vect_names
-
-#drop rows with multiple names from the original "yeast" df using dplyr
-yeast_single <- filter(yeast, !grepl(";",Gene.designations)) # filter keeps rows that do NOT have a ; in first column
-
-#merge the two df and arrange rows by gene name
-yeast_full <- full_join(yeast_single, yeast_expand) %>% arrange(Gene.designations) %>% tbl_df()
+gene_name <- function(y, df = yeast_full){
+    out <- df[match(x, df$OLN), ]$Gene.designations
+    
+    df_temp <- df[grep(paste(y, collapse = "|"), df$OLN, value = FALSE), c(1,2,4)] %>% arrange(Entry)
+    # df_temp <- df_temp[order(df$Entry),] # another way to order the df that doesn't require dplyr
+    output <- df_temp$Gene.designations
+    names(output) <- df_temp$OLN
+    return(output)
+}
