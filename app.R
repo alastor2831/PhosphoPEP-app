@@ -5,10 +5,10 @@ library(tidyverse)
 library(rvest)
 library(DT)
 library(shinythemes)
-
+library(httr)
 # Define UI for application that draws a histogram
-ui <- fluidPage(#theme = shinytheme("slate"),
-  shinythemes::themeSelector(),
+ui <- fluidPage(theme = shinytheme("slate"),
+  
    # Application title
    titlePanel("PhosphoPEP Database"),
    
@@ -18,21 +18,24 @@ ui <- fluidPage(#theme = shinytheme("slate"),
           selectInput(inputId = "gene_name", label = "Choose a knock-out strain from the PhosphoPEP Database",
                      choices = knockout_list$gene 
                      ),
-          actionButton(inputId = "button1", label = "Search")
+          actionButton(inputId = "button1", label = "Search"),
+          textOutput(outputId = "selected_strain")
       ),
       
-      mainPanel(
-        DT::DTOutput(outputId = "ppep_table")
+      mainPanel(tabsetPanel(
+        tabPanel("tab1", DT::DTOutput(outputId = "ppep_table"))
       )
    )
-)
+  )
+  )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
-  #knock_out_table <- eventReactive(input$button1, {
-    
-    
+  output$selected_strain <- renderText({
+    paste("You are looking at knock-out strain for", input$gene_name, " from PPEP DB")
+  })
+  
   df <- eventReactive(input$button1, {
     kinase_url <- paste0("http://www.sbeams.org/devDC/sbeams/cgi/Glycopeptide//kinase_details.cgi?kinase=",
                        knockout_list[knockout_list$gene == input$gene_name, 1])
@@ -54,7 +57,11 @@ server <- function(input, output) {
   })
   
   output$ppep_table <- renderDT({
-    df()
+    DT::datatable(df(), style = "bootstrap",
+                  options = list(paging = FALSE, selection = "none")) %>% 
+      formatStyle(
+        "FoldChange", color = styleInterval(0, c("red", "green"))
+      )
   })
   
 }
@@ -63,3 +70,39 @@ server <- function(input, output) {
 # Run the application 
 shinyApp(ui = ui, server = server)
 
+
+# 
+# 
+# 
+# raw <- GET("https://www.uniprot.org/uniprot/P12345.xml") %>% 
+# 
+# parsed <- content(raw, as = "raw", content = "text/xml") %>% 
+#   read_html()
+#   
+#   parsed %>% 
+#     html_nodes(xpath = '//recommendedname/* |
+#                //name[@type="primary"] | //comment[@type="function"]/text |
+#                //comment[@type="interaction"]/text') %>% 
+#     html_text()
+# 
+#   parsed %>% 
+#     html_nodes(xpath = '//dbreference') %>% 
+#     html_table()  
+#   
+#                    
+# residues_vector <- parsed %>%
+#     html_nodes(xpath = '//feature[@type="modified residue"] |
+#                //feature[@type="modified residue"]/location/*') %>% 
+#     xml_attrs() %>%
+#     unlist() %>%
+#     tibble(
+#       type = .[seq(1, to = length(.), by = 4)]),
+#       description = residues_vector[seq(2, to = length(residues_vector), by = 4)],
+#       position = residues_vector[seq(4, to = length(residues_vector), by = 4)]
+#     )
+# 
+# %>% View
+# 
+# 
+# parsed %>% 
+# html_structure()
