@@ -7,7 +7,7 @@ While using the PhosphoPep web-interface to browse differentially expressed phos
 Since everyone knows that less clicks is better, this app shows all the informations in one table. 
 
 ## How to use it
-Launch the live version of the app from          and select the protein of interest. All phosphorilation data will be displayed in a table on the right. That's it! 
+Launch the live version of the app from https://nicks.shinyapps.io/PhosphoPEP/ and select the protein of interest. All phosphorilation data will be displayed in a table on the right. That's it! 
 
 More info from Uniprot about the selected protein can be retrieved by the button in the left column.
 
