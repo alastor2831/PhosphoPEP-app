@@ -23,7 +23,7 @@ After some data wrangling and cleaning it outputs a dataframe with one row for e
 #### src/uniprotwebscraping.R
 Since Uniprot does not provide APIs to quickly access data, this function uses webscraping to collect a brunch of information about a single protein.
 
-##### /app.R
+#### /app.R
 
 * **ui**
 
