@@ -46,12 +46,5 @@ Contains two main reactive events
 Contains the output functions
 
 1. output$ppep_table
-  i) diplays the interactive table on the right side panel. Uses `DT` and `colorRamp` packages to color code the `foldChange` column based on its values (green: overexpression/upregulated, red: downregulated)
+    + diplays the interactive table on the right side panel. Uses `DT` and `colorRamp` packages to color code the `foldChange` column based on its values (green: overexpression/upregulated, red: downregulated)
 
-
-
-
-
-
-
-This script written in R uses a local dataframe of the yeast proteome (retrived from Uniprot database) to find the correspondence between Systematic and Standard names. The data of selected knock-out strains are scraped from PhosphoPep website, as no APIs are available.
