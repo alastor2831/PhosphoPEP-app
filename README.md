@@ -23,11 +23,10 @@ After some data wrangling and cleaning it outputs a dataframe with one row for e
 #### src/uniprotwebscraping.R
 Since Uniprot does not provide APIs to quickly access data, this function uses webscraping to collect a brunch of information about a single protein.
 
-The app code is located in the main folder
-
 ##### /app.R
 
 * **ui**
+
 Contains the front-end code, based on a dark theme ("slated") (via the `shinyWidgets` package). It creates the two click buttons and 
 
 
@@ -36,13 +35,13 @@ Contains the front-end code, based on a dark theme ("slated") (via the `shinyWid
 Contains two main reactive events 
 
 1. eventReactive(input$button1)
-  i) web scraping of the PhosphoPEP database for the requested protein
-  ii) data wrangling and cleaning
-  iii) returns a data frame
+    + web scraping of the PhosphoPEP database for the requested protein
+    + data wrangling and cleaning
+    + returns a data frame
 
 2. eventReactive(input$uniprot_btn)
-  i) calls get_uniprot_data
-  ii) returns a list
+    + calls get_uniprot_data
+    + returns a list
 
 Contains the output functions
 
