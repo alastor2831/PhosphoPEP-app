@@ -1,6 +1,8 @@
 knockout_list <- readRDS("./data/knockout_list.Rds")
 oln_lookup <-  readRDS("./data/OLN_lookup.Rds")
 
+source("./src/uniprotwebscraping.R")
+
 library(shiny)
 library(magrittr)
 library(rvest)
@@ -15,23 +17,20 @@ library(tidyr)
 library(stringr)
 library(purrr)
 
-# helper function
-
-
-
 
 # app front-end
 
 ui <- fluidPage(theme = shinytheme("slate"),
    
-   h1("PhosphoPEP Database"),
-   
+   h1("PhosphoPEP Web App"),
+   h4("A Shiny App to retrieve and display data from the PhosphoPep database and Uniprot"),
    sidebarLayout(
       sidebarPanel(width = 3,
-        h4("Select a kinase knock-out strain and press Search"),
+        
+                h4("Select a kinase knock-out strain and press Search"),
         selectInput(inputId = "gene_name",
                       label = NULL,
-                      choices = knockout_list$gene 
+                      choices = sort(knockout_list$gene) 
                      ),
         actionBttn(inputId = "button1",
                    label = "Search",
@@ -57,6 +56,9 @@ ui <- fluidPage(theme = shinytheme("slate"),
           p('Reference:'),
           HTML("<p style='font-style:italic'> Bernd Bodenmiller, Johan Malmstrom, Bertran Gerrits, David Campbell, Henry Lam, Alexander Schmidt, Oliver Rinner, Lukas N Mueller, Paul T Shannon, Patrick G Pedrioli, Christian Panse, Hoo-Keun Lee, Ralph Schlapbach, Ruedi Aebersold   Molecular Systems Biology. <b>2007</b> Oct; 3 (139)."),
           tags$b(p(HTML('<a href="http://www.nature.com/msb/journal/v3/n1/full/msb4100182.html">PhosphoPep—a phosphoproteome resource for systems biology research in Drosophila Kc167 cells</a>')),
+          br(),
+          HTML("<p>Source code on <a href='https://github.com/nickeatingpizza/PhosphoPEP-app'>GitHub</a>"),
+         
           HTML('<div style="position:fixed;padding-bottom:15px;bottom:0;color: white;font-family: Courier;font-size: 14px;font-style: italic;text-decoration-line: underline;text-decoration-style: dashed;text-decoration-color: #28b78d;">
             <p>this is a Shiny App coded by Nick ~circa end of 2018</p></div>')
         )
@@ -123,33 +125,43 @@ server <- function(input, output) {
   output$tableTitle <- renderText({
     title()
   })
-  
+
   output$ppep_table <- renderDT({
-   
-    brks <- c(seq(min(df()$FoldChange), to = 0, by = 1.5),
-              seq(0, max(df()$FoldChange), by = 1.5))
+      
+    if (length(df()$FoldChange)>2){
+      
+      brks <- c(seq(min(df()$FoldChange), to = 0, by = 1.5),
+                seq(0, max(df()$FoldChange), by = 1.5))
+      
+      length_palette <- length(brks) + 1
+      negative.length <- round(abs(range(df()$FoldChange)[1]) / 
+                                 diff(range(df()$FoldChange)) * 
+                                 length_palette)
+      
+      positive.length <- length_palette - negative.length
+      
+      cols <- c(colorRampPalette(c("orangered2", "white"))(negative.length),
+                colorRampPalette(c("white", "lawngreen"))(positive.length))
+    }
     
-    length_palette <- length(brks) + 1
-    negative.length <- round(abs(range(df()$FoldChange)[1]) / 
-                               diff(range(df()$FoldChange)) * 
-                               length_palette)
+    if (length(df()$FoldChange)>2){
+      DT::datatable(df(), style = "bootstrap", options = list(paging = FALSE,
+                                                              selection = "none"),
+                    escape = FALSE) %>%
     
-    positive.length <- length_palette - negative.length
-    
-    cols <- c(colorRampPalette(c("orangered2", "white"))(negative.length),
-              colorRampPalette(c("white", "lawngreen"))(positive.length))
-    
-    DT::datatable(df(), style = "bootstrap", options = list(paging = FALSE,
-                                                            selection = "none"),
-                  escape = FALSE) %>%
-      formatStyle("FoldChange",
-                  backgroundColor = styleInterval(cuts = brks,
-                                                  values = cols),
-                  fontWeight = "bold",
-                  color = "black")
-    
-  })
-  
+       formatStyle("FoldChange",
+                    backgroundColor = styleInterval(cuts = brks,
+                                                    values = cols),
+                    fontWeight = "bold",
+                    color = "black")
+      
+    } else {
+      DT::datatable(df(), style = "bootstrap", options = list(paging = FALSE,
+                                                              selection = "none"),
+                    escape = FALSE)
+      
+    }
+    })
 }
 
 

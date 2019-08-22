@@ -34,11 +34,16 @@ get_uniprot_data <- function(uniprot_ac){
     xml_attrs() %>%
     unlist()
   
+  if (!is.null(residues_vector)) {
   mod_aa <- tibble(
     type = residues_vector[seq(1, to = length(residues_vector), by = 4)],
     description = residues_vector[seq(2, to = length(residues_vector), by = 4)],
     position = residues_vector[seq(4, to = length(residues_vector), by = 4)]
-  )
+    )
+  } else
+    mod_aa <- NULL
+  
+  
   
   return(list(protein_info, biogrid_link, mod_aa))
   

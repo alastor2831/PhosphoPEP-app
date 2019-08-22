@@ -1,5 +1,5 @@
-# PPEP-scraper
-an R Shiny App to retrieve and visualize data from the PhosphoPep database (https://www.ncbi.nlm.nih.gov/pubmed/17940529) 
+# PhosphoPEP Web App
+An R Shiny App to retrieve and visualize data from the PhosphoPep database (https://www.ncbi.nlm.nih.gov/pubmed/17940529) 
 
 ## Why?
 While using the PhosphoPep web-interface to browse differentially expressed phosphopeptides data in yeast (*S. cerevisiae*), I noticed that the single knock-out strains page would only show the Systematic Name (eg. YLL021W) instead of/in addition to the standard name (eg. SPA2) for each differentially expressed phosphopeptide. This forced me to have to click on each peptide to find out the standard name of the corresponding protein.
